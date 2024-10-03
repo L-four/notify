@@ -138,6 +138,12 @@ func payloadFromContext(ctx context.Context, subject, message string) ([]byte, e
 	return payloadBytes, nil
 }
 
+// PushServiceError pass up the http status code so caller can handle it
+type PushServiceError struct {
+    error
+    StatusCode int
+}
+
 // send is a wrapper that makes it primarily easier to defer the closing of the response body.
 func (s *Service) send(ctx context.Context, message []byte, subscription *Subscription, options *Options) error {
 	res, err := webpush.SendNotificationWithContext(ctx, message, subscription, options)
@@ -152,10 +158,14 @@ func (s *Service) send(ctx context.Context, message []byte, subscription *Subscr
 
 	// Make sure to produce a helpful error message
 
-	baseErr := fmt.Errorf(
-		"send message to webpush subscription %s: unexpected status code %d",
-		subscription.Endpoint, res.StatusCode,
-	)
+	// Make sure to produce a helpful error message
+	baseErr := PushServiceError{
+        error: fmt.Errorf(
+            "send message to webpush subscription %s: unexpected status code %d",
+            subscription.Endpoint, res.StatusCode,
+        ),
+        StatusCode: res.StatusCode,
+    }
 
 	if _, err = io.ReadAll(res.Body); err != nil {
 		err = fmt.Errorf("read response body: %w", err)

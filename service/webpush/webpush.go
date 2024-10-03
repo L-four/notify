@@ -142,6 +142,7 @@ func payloadFromContext(ctx context.Context, subject, message string) ([]byte, e
 type PushServiceError struct {
     error
     StatusCode int
+	Subscription Subscription
 }
 
 // send is a wrapper that makes it primarily easier to defer the closing of the response body.
@@ -165,6 +166,7 @@ func (s *Service) send(ctx context.Context, message []byte, subscription *Subscr
             subscription.Endpoint, res.StatusCode,
         ),
         StatusCode: res.StatusCode,
+		Subscription: *Subscription,
     }
 
 	if _, err = io.ReadAll(res.Body); err != nil {

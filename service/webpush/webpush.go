@@ -166,7 +166,7 @@ func (s *Service) send(ctx context.Context, message []byte, subscription *Subscr
             subscription.Endpoint, res.StatusCode,
         ),
         StatusCode: res.StatusCode,
-		Subscription: *Subscription,
+		Subscription: *subscription,
     }
 
 	if _, err = io.ReadAll(res.Body); err != nil {
